@@ -17,7 +17,7 @@ One crucial aspect of BG accounts is that they should be excluded from CAPs wher
   - Managed Identity (for use in Azure Automation)
   - App Registration with Client Secret
   - App Registration with Certificate
-  - Delegated permissions
+  - Delegated authentication
 
 ## Prerequisites
 
@@ -82,8 +82,7 @@ One crucial aspect of BG accounts is that they should be excluded from CAPs wher
 ```powershell
 .\Confirm-BreakGlassConditionalAccessExclusions.ps1 `
     -Break_Glass_Account "bg1@contoso.com","bg2@contoso.com" `
-    -To "admin@contoso.com" `
-    -From "noreply@contoso.com"
+
 ```
 
 ## Output
@@ -94,7 +93,7 @@ The script generates a CSV report listing any Conditional Access Policies that d
 
 - The script uses the Microsoft Graph SDK for most operations.
 - Email functionality relies on the `Send-GraphMailMessage` function from [Microsoft.Graph.Extensions](https://github.com/thetolkienblackguy/Microsoft.Graph.Extensions/tree/main).
-- While this README focuses on the client secret authentication method, the script also supports managed identity, certificate-based authentication, and delegated permissions.
+- While this README focuses on the client secret authentication method, the script also supports managed identity, certificate-based authentication, and delegated authentication.
 
 ## Contributing
 
