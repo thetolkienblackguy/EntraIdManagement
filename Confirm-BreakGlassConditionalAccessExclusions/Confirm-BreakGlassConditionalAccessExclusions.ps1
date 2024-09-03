@@ -58,7 +58,7 @@
     Date: 09/01/2024
     Version: 1.0
     Name: Confirm-BreakGlassConditionalAccessExclusions
-
+Confirm-BreakGlassConditionalAccessExclusions
     Version History:
     1.0 - Initial release - Gabriel Delaney - 08/31/2024
 
