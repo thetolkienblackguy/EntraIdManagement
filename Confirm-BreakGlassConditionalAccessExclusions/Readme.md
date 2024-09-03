@@ -7,7 +7,7 @@ This PowerShell script is designed to monitor and verify the exclusion of break 
 Microsoft's guidance on break glasss (emergency access accounts) is available at [Security emergency access accounts in Azure AD](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/security-emergency-access).
 
 
-## Features
+## What it Does
 
 - Checks if specified break glass accounts are excluded from all Conditional Access Policies by checking if the account is excluded individually, as part of a group, or as part of a nested group
 - Generates a report of policies where BG accounts are not excluded
