@@ -39,6 +39,10 @@ One crucial aspect of BG accounts is that they should be excluded from CAPs wher
 
 6. Once registered, go to "API permissions" and add the following permissions:
    - Microsoft Graph > Application > Mail.Send
+
+**Important** It is recommended to limit the scope of the Mail.Send permission to only the mailbox that will be used to send the email alerts.
+   Reference: [Application Access Policy](https://learn.microsoft.com/graph/auth-limit-mailbox-access)
+   
    - Microsoft Graph > Application > Policy.Read.All
    - Microsoft Graph > Application > User.Read.All
 
@@ -51,13 +55,48 @@ One crucial aspect of BG accounts is that they should be excluded from CAPs wher
 
 ![Client Secret](https://private-user-images.githubusercontent.com/28851692/363809910-75f4e13b-5316-4dd0-839e-59790ee0be91.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjUzMjU1MDIsIm5iZiI6MTcyNTMyNTIwMiwicGF0aCI6Ii8yODg1MTY5Mi8zNjM4MDk5MTAtNzVmNGUxM2ItNTMxNi00ZGQwLTgzOWUtNTk3OTBlZTBiZTkxLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA5MDMlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwOTAzVDAxMDAwMlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWRhZmNkYmZkOTk4ZjkyNjdkNjU5YWM2NThmMzhkN2JiNTFiNzQxMTg0YjNmMDFmZDllNWEyOGI1YzQyYTgyMWEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.pcFmSbs6IRediIexW0rzEo9hX4LrezQMf-hEMCTG0F8)
 
-## Examples
+## Running the Script
 
-### Client Secret Authentication
+### Preparing your Environment
+
+1. Ensure you have the latest version of PowerShell installed.
+2. Install the Microsoft Graph PowerShell SDK by running:
+
+```powershell
+Install-Module Microsoft.Graph -Scope CurrentUser
+```
+
+3. Install the Microsoft.Graph.Extensions module:
+
+```powershell
+# Download the module
+Invoke-WebRequest -Uri "https://github.com/thetolkienblackguy/Microsoft.Graph.Extensions/archive/main.zip" -OutFile "Microsoft.Graph.Extensions.zip"
+
+# Extract the module
+Expand-Archive -Path "Microsoft.Graph.Extensions.zip" -DestinationPath "C:\Temp"
+
+# Move the module to the PowerShell modules folder
+Move-Item -Path "C:\Temp\Microsoft.Graph.Extensions-main" -Destination "$($env:PSModulePath.Split(';')[0])\Microsoft.Graph.Extensions"
+
+# Import the module
+Import-Module Microsoft.Graph.Extensions
+
+```
+
+### Script Parameters
+
+- `Break_Glass_Account`: An array of UPNs for your break glass accounts
+- `To`: Email address(es) to send the report to
+- `From`: Email address to send the report from
+- `Client_Id`: Your app registration's client ID
+- `Tenant_Id`: Your Entra ID tenant ID
+- `Client_Secret`: Your app registration's client secret
+
+### Running with Client Secret Authentication
 
 ```powershell
 .\Confirm-BreakGlassConditionalAccessExclusions.ps1 `
-    -Break_Glass_Account "bg1@contoso.com","bg2@contoso.com" `
+    -Break_Glass_Account @("bg1@contoso.com","bg2@contoso.com") `
     -To "admin@contoso.com" `
     -From "noreply@contoso.com" `
     -Client_Id "your-client-id" `
@@ -65,11 +104,13 @@ One crucial aspect of BG accounts is that they should be excluded from CAPs wher
     -Client_Secret "your-client-secret"
 ```
 
-### Certificate Authentication
+### Running with Certificate Authentication
+
+For certificate-based authentication, you'll need to upload a certificate to your app registration and use its thumbprint:
 
 ```powershell
 .\Confirm-BreakGlassConditionalAccessExclusions.ps1 `
-    -Break_Glass_Account "bg1@contoso.com","bg2@contoso.com" `
+    -Break_Glass_Account @("bg1@contoso.com","bg2@contoso.com") `
     -To "admin@contoso.com" `
     -From "noreply@contoso.com" `
     -Client_Id "your-client-id" `
@@ -77,17 +118,29 @@ One crucial aspect of BG accounts is that they should be excluded from CAPs wher
     -Certificate_Thumbprint "your-certificate-thumbprint"
 ```
 
-### Delegated Authentication
+### Running with Delegated Permissions
+
+For delegated permissions, you'll need to authenticate interactively:
 
 ```powershell
 .\Confirm-BreakGlassConditionalAccessExclusions.ps1 `
-    -Break_Glass_Account "bg1@contoso.com","bg2@contoso.com" `
-
+    -Break_Glass_Account @("bg1@contoso.com","bg2@contoso.com") `
+    -To "admin@contoso.com" `
+    -From "noreply@contoso.com"
 ```
 
-## Output
+## Output and Reporting
 
-The script generates a CSV report listing any Conditional Access Policies that do not exclude the specified break glass accounts. If email parameters are provided, this report is sent via email using the `Send-GraphMailMessage` function from the [Microsoft.Graph.Extensions](https://github.com/thetolkienblackguy/Microsoft.Graph.Extensions/tree/main) module.
+The script generates a CSV report listing any Conditional Access Policies that do not exclude the specified break glass accounts. This report includes:
+
+- Policy ID
+- Policy Name
+- Description
+- State (Enabled/Disabled)
+- Break Glass Account affected
+- Whether it's excluded from the policy
+
+If email parameters are provided, this report is sent via email using the `Send-GraphMailMessage` function from the Microsoft.Graph.Extensions module.
 
 ## Notes
 
