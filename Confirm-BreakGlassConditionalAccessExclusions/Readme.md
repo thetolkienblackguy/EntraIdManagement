@@ -2,15 +2,14 @@
 
 ## Overview
 
-Roughly two years ago, one of my clients encountered a critical situation where a Conditional Access Policy (CAP) was created that blocked every user from accessing Entra ID, with the exception of some printer mailboxes. They called me on a Saturday, and thankfully, I had an app registration that I could use to add an admin to the CAP's exclusion group.
+This PowerShell script is designed to monitor and verify the exclusion of break glass (BG) accounts from Conditional Access Policies (CAPs) in Microsoft Entra ID (formerly Azure AD). It addresses situations where BG accounts might inadvertently be included in restrictive policies, potentially blocking emergency access when it's most needed.
 
-Ever since that incident, I've been adamant about working with my clients to create break glass (BG) accounts, following Microsoft's best practices as closely as possible: [Security emergency access accounts in Azure AD](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/security-emergency-access).
+Microsoft's guidance on break glasss (emergency access accounts) is available at [Security emergency access accounts in Azure AD](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/security-emergency-access).
 
-One crucial aspect of BG accounts is that they should be excluded from CAPs wherever possible. While this may seem straightforward, in environments with multiple administrators, I often see CAPs being created without excluding the BG accounts. To address this, I've developed a simple solution: this PowerShell script.
 
 ## Features
 
-- Checks if specified break glass accounts are excluded from all Conditional Access Policies
+- Checks if specified break glass accounts are excluded from all Conditional Access Policies by checking if the account is excluded individually, as part of a group, or as part of a nested group
 - Generates a report of policies where BG accounts are not excluded
 - Optionally sends an email report with findings
 - Supports multiple authentication methods:
