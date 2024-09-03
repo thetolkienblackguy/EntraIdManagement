@@ -39,12 +39,11 @@ One crucial aspect of BG accounts is that they should be excluded from CAPs wher
 
 6. Once registered, go to "API permissions" and add the following permissions:
    - Microsoft Graph > Application > Mail.Send
-
-**Important** It is recommended to limit the scope of the Mail.Send permission to only the mailbox that will be used to send the email alerts.
-   Reference: [Application Access Policy](https://learn.microsoft.com/graph/auth-limit-mailbox-access)
-   
    - Microsoft Graph > Application > Policy.Read.All
    - Microsoft Graph > Application > User.Read.All
+
+   **Important** It is recommended to limit the scope of the Mail.Send permission to only the mailbox that will be used to send the email alerts.
+   Reference: [Application Access Policy](https://learn.microsoft.com/graph/auth-limit-mailbox-access)
 
 7. Click "Grant admin consent" for your organization.
 
