@@ -9,7 +9,7 @@
     The path to the output file.
 
     .PARAMETER Select
-    The properties to select from the output.   
+    The properties to select from the output.
 
     .PARAMETER To
     The email address(es) to send the report to.
@@ -42,7 +42,7 @@
     The certificate thumbpint of the app registration.
 
     .PARAMETER Client_Secret
-    The client secret of the app registration.  
+    The client secret of the app registration.
 
     .EXAMPLE
     .\Confirm-BreakGlassConditionalAccessExclusions.ps1 -Break_Glass_Account "user1@contoso.com","user2@contoso.com" -To "user1@contoso.com","user2@contoso.com" -ManagedIdentity
@@ -85,7 +85,7 @@ param (
     [Parameter(DontShow=$true)]
     [string[]]$Scope = @(
         "Policy.Read.All","User.Read.All","Mail.Send"
-        
+
     ),
     [Parameter(Mandatory=$true, ParameterSetName="ManagedIdentity")]
     [switch]$ManagedIdentity,
@@ -150,7 +150,7 @@ If ($PSCmdlet.ParameterSetName -notin ("ManagedIdentity","Delegated")) {
     If ($PSCmdlet.ParameterSetName -eq "ClientSecret") {
         $connect_mg_params["ClientSecretCredential"] = New-Object System.Management.Automation.PSCredential($client_id, $($client_secret | ConvertTo-SecureString))
 
-    # If the parameter set is certificate, then we need to set the certificate thumbpintd    
+    # If the parameter set is certificate, then we need to set the certificate thumbpintd
     } ElseIf ($PSCmdlet.ParameterSetName -eq "Certificate") {
         $connect_mg_params["ClientId"] = $client_id
         $connect_mg_params["CertificateThumbprint"] = $certificate_thumbpint
@@ -164,8 +164,8 @@ If ($PSCmdlet.ParameterSetName -notin ("ManagedIdentity","Delegated")) {
 #endregion
 
 #region Graph Call
-Try { 
-    Write-Host "Connecting to Graph" 
+Try {
+    Write-Host "Connecting to Graph"
     # Connecting to Microsoft Graph
     Connect-MgGraph @connect_mg_params
     Write-Host "Connected to Graph successfully" -ForegroundColor Green
@@ -195,10 +195,10 @@ Try {
 
         # Getting the user's group memberships
         Write-Host "Retrieving user's $($account) group transitive memberships for $($user.id)"
-        $member_of = Get-MgUserTransitiveMemberOf -UserId $user.id 
+        $member_of = Get-MgUserTransitiveMemberOf -UserId $user.id
 
         # Creating an array of the user's group memberships and the user's id
-        $inclusion_dir_objs = @($user.id) + @($member_of.id) 
+        $inclusion_dir_objs = @($user.id) + @($member_of.id)
 
         # Looping through each conditional access policy
         Write-Host "Checking if $($account) is excluded from the conditional access policies"
@@ -226,13 +226,13 @@ Try {
                 # If the inclusion object is not in the exclusion object array, then we set ExcludedFromPolicy to false
                 } Else {
                     $policy_obj.ExcludedFromPolicy = $false
-                
+
                 }
             }
             # Adding the policy to the output object
             If (!$policy_obj.ExcludedFromPolicy) {
                 $output_obj.Add($policy_obj)
-            
+
             }
         }
     }
@@ -249,19 +249,19 @@ Try {
     # If there are policies applied to the break glass account, then we send an email
     If ($output_obj.Count -gt 0) {
         # Exporting the output object to a csv
-        $output_obj | Export-Csv -Path $outfile
+        $output_obj | Export-Csv -UseCulture -Path $outfile
 
         # If there are email addresses to send the email to, then we send the email
-        If ($to -and $from) {   
+        If ($to -and $from) {
             If ($PSCmdlet.ParameterSetName -eq "Delegated") {
                 Write-Warning "Sending messages as another user is not supported with delegated permissions. Please use a managed identity or app registration to send the email."
-        
+
             } Else {
                 # Sending the email
                 Send-GraphMailMessage @send_mail_params
-            
+
             }
-        } 
+        }
     }
 } Catch {
     # If there is an error, we write an error message and exit
