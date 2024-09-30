@@ -1024,7 +1024,7 @@ Foreach ($policy in $policies) {
             Export-CAPJson @export_cap_params -Version 1
 
             # Write the policy to the console
-            Write-Output "Policy $($policy_id) has been saved to $($full_path)"
+            Write-Output "Policy $($policy_id) has been saved to $($policy_path)"
             Write-Output "This is the initial version of the policy so no comparison is needed"
             Continue
             
@@ -1075,7 +1075,7 @@ Foreach ($policy in $policies) {
                 $policy_reports.Add($html_report_obj)
 
                 Write-Output "The policy $($policy_id) has been modified since the last version"
-                Write-Output "The report has been saved to $($html_report)"
+                Write-Output "The report has been saved to $($html_report_obj.Path)"
             
             }   
         }
