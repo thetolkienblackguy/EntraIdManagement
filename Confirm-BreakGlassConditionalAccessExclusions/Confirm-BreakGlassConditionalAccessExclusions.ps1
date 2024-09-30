@@ -97,7 +97,7 @@ param (
     [Parameter(Mandatory=$true, ParameterSetName="Certificate")]
     [string]$Tenant_Id,
     [Parameter(Mandatory=$true, ParameterSetName="Certificate")]
-    [string]$Certificate_Thumbpint,
+    [string]$Certificate_Thumbprint,
     [Parameter(Mandatory=$true, ParameterSetName="ClientSecret")]
     [string]$Client_Secret
 
@@ -152,7 +152,7 @@ If ($PSCmdlet.ParameterSetName -eq "ClientSecret") {
 # If the parameter set is certificate, then we need to set the certificate thumbprint
 } ElseIf ($PSCmdlet.ParameterSetName -eq "Certificate") {
     $connect_mg_params["ClientId"] = $client_id
-    $connect_mg_params["CertificateThumbprint"] = $certificate_thumbpint
+    $connect_mg_params["CertificateThumbprint"] = $certificate_thumbprint
 
 } ElseIf ($PSCmdlet.ParameterSetName -eq "Delegated") {
     $connect_mg_params["Scopes"] = $scopes
