@@ -123,8 +123,7 @@ For delegated permissions, you'll need to authenticate interactively:
 ```powershell
 .\Confirm-BreakGlassConditionalAccessExclusions.ps1 `
     -Break_Glass_Account @("bg1@contoso.com","bg2@contoso.com") `
-    -To "admin@contoso.com" `
-    -From "noreply@contoso.com"
+
 ```
 
 ## Output and Reporting
