@@ -99,7 +99,6 @@ $send_mail_params = @{}
 $send_mail_params["To"] = $to
 $send_mail_params["From"] = $from
 $send_mail_params["Subject"] = $subject
-$send_mail_params["Body"] = $body
 If ($cc) {
     $send_mail_params["Cc"] = $Cc
 
@@ -197,7 +196,7 @@ Function Compare-CAPObjectRecursively {
             $is_different = $false
 
             # Skip the ModifiedDateTime property
-            if ($property_name -eq "ModifiedDateTime") { 
+            if ($property_name -like "*ModifiedDateTime*" -or $property_name -like "*CreatedDateTime*") { 
                 continue 
             
             }
@@ -1092,7 +1091,6 @@ Foreach ($policy in $policies) {
 # Create the index.html file
 If ($policy_reports.Count -gt 0) {
     $index_html_obj = New-CAPIndexHtml -PolicyReports $policy_reports -OutputPath $output_path
-    Invoke-Item -Path $index_html_obj.Path
     Write-Output "Index HTML created at: $($index_html_obj.Path)"
 
     # Send an email with the index HTML
