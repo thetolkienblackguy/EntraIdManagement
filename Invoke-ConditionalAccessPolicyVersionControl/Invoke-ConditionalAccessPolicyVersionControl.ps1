@@ -51,7 +51,7 @@ param (
     [Parameter(Mandatory=$false)]
     [string]$From,
     [Parameter(Mandatory=$false)]
-    [string]$Cc,
+    [string[]]$Cc,
     [Parameter(Mandatory=$false)]
     [string]$Subject = "Conditional Access Policy Comparison Report",
     [Parameter(DontShow=$true)]
