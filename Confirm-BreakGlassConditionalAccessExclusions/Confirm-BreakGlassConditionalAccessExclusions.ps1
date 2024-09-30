@@ -58,8 +58,9 @@
     Date: 09/01/2024
     Version: 1.0
     Name: Confirm-BreakGlassConditionalAccessExclusions
+    
     Version History:
-    1.0 - Initial release - Gabriel Delaney - 08/31/2024
+    1.0 - Initial release - Gabriel Delaney - 09/01/2024
 
     .LINK
     https://github.com/thetolkienblackguy/EntraIdManagement/Readme.md
@@ -146,11 +147,12 @@ $connect_mg_params["NoWelcome"] = $true
 #If the parameter set is not managed identity, then we need to set the tenant id
 If ($PSCmdlet.ParameterSetName -notin ("ManagedIdentity","Delegated")) {
     $connect_mg_params["TenantId"] = $tenant_id
+    
     #If the parameter set is client secret, then we need to create a client secret credential object
     If ($PSCmdlet.ParameterSetName -eq "ClientSecret") {
         $connect_mg_params["ClientSecretCredential"] = New-Object System.Management.Automation.PSCredential($client_id, $($client_secret | ConvertTo-SecureString))
 
-    # If the parameter set is certificate, then we need to set the certificate thumbpintd
+    # If the parameter set is certificate, then we need to set the certificate thumbprint
     } ElseIf ($PSCmdlet.ParameterSetName -eq "Certificate") {
         $connect_mg_params["ClientId"] = $client_id
         $connect_mg_params["CertificateThumbprint"] = $certificate_thumbpint
