@@ -78,7 +78,7 @@ param (
     [Parameter(Mandatory=$false)]
     [string]$From,
     [Parameter(Mandatory=$false)]
-    [string]$Cc,
+    [string[]]$Cc,
     [Parameter(Mandatory=$false)]
     [string]$Subject = "Entra ID Break Glass Account Conditional Access Policy Review",
     [Parameter(Mandatory=$false)]
