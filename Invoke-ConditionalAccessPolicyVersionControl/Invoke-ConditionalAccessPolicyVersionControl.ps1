@@ -55,7 +55,7 @@ param (
     [Parameter(Mandatory=$false)]
     [string]$Subject = "Conditional Access Policy Comparison Report",
     [Parameter(DontShow=$true)]
-    [string[]]$Scope = @(
+    [string[]]$Scopes = @(
         "Policy.Read.All","AuditLog.Read.All","Mail.Send"
 
     ),
@@ -106,25 +106,20 @@ If ($cc) {
 
 # Connect-MgGraph parameters
 $connect_mg_params = @{}
+$connect_mg_params["TenantId"] = $tenant_id
 $connect_mg_params["NoWelcome"] = $true
-
-# If the parameter set is not managed identity, then we need to set the tenant id
-If ($PSCmdlet.ParameterSetName -notin ("ManagedIdentity","Delegated")) {
-    $connect_mg_params["TenantId"] = $tenant_id
     
-    # If the parameter set is client secret, then we need to create a client secret credential object
-    If ($PSCmdlet.ParameterSetName -eq "ClientSecret") {
-        $connect_mg_params["ClientSecretCredential"] = New-Object System.Management.Automation.PSCredential($client_id, $($client_secret | ConvertTo-SecureString))
+# If the parameter set is client secret, then we need to create a client secret credential object
+If ($PSCmdlet.ParameterSetName -eq "ClientSecret") {
+    $connect_mg_params["ClientSecretCredential"] = New-Object System.Management.Automation.PSCredential($client_id, $($client_secret | ConvertTo-SecureString))
 
-    # If the parameter set is certificate, then we need to set the certificate thumbprint
-    } ElseIf ($PSCmdlet.ParameterSetName -eq "Certificate") {
-        $connect_mg_params["ClientId"] = $client_id
-        $connect_mg_params["CertificateThumbprint"] = $certificate_thumbpint
+# If the parameter set is certificate, then we need to set the certificate thumbprint
+} ElseIf ($PSCmdlet.ParameterSetName -eq "Certificate") {
+    $connect_mg_params["ClientId"] = $client_id
+    $connect_mg_params["CertificateThumbprint"] = $certificate_thumbpint
 
-    }
-# If the parameter set is delegated, then we need to set the scope
 } ElseIf ($PSCmdlet.ParameterSetName -eq "Delegated") {
-    $connect_mg_params["Scope"] = $scope
+    $connect_mg_params["Scopes"] = $scopes
 
 }
 #endregion
@@ -280,7 +275,7 @@ Function New-CAPHTMLComparison {
     )
     Begin {
         # Get the total number of changes
-        $total_changes = $differences.Count
+        $total_changes = @($differences).Count
 
         # Format the changes
         $changes_rows = $differences | ForEach-Object {
@@ -1093,8 +1088,12 @@ If ($policy_reports.Count -gt 0) {
     $index_html_obj = New-CAPIndexHtml -PolicyReports $policy_reports -OutputPath $output_path
     Write-Output "Index HTML created at: $($index_html_obj.Path)"
 
+    # Finalize the Send-GraphMailMessage parameters
+    $send_mail_params["Body"] = $index_html_obj.Html
+    $send_mail_params["Attachments"] = $index_html_obj.Path
+    
     # Send an email with the index HTML
-    Send-GraphMailMessage @send_mail_params -Body $index_html_obj.Html
+    Send-GraphMailMessage @send_mail_params
 
 } Else {
     Write-Output "No policy changes detected. No index HTML created."

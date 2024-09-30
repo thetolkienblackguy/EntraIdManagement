@@ -84,7 +84,7 @@ param (
     [Parameter(Mandatory=$false)]
     [string]$Body = "Please review the attached report and take appropriate action.",
     [Parameter(DontShow=$true)]
-    [string[]]$Scope = @(
+    [string[]]$Scopes = @(
         "Policy.Read.All","User.Read.All","Mail.Send"
 
     ),
@@ -142,25 +142,20 @@ $send_mail_params["Attachments"] = $outfile
 
 # Connect-MgGraph parameters
 $connect_mg_params = @{}
+$connect_mg_params["TenantId"] = $tenant_id
 $connect_mg_params["NoWelcome"] = $true
-
-#If the parameter set is not managed identity, then we need to set the tenant id
-If ($PSCmdlet.ParameterSetName -notin ("ManagedIdentity","Delegated")) {
-    $connect_mg_params["TenantId"] = $tenant_id
     
-    #If the parameter set is client secret, then we need to create a client secret credential object
-    If ($PSCmdlet.ParameterSetName -eq "ClientSecret") {
-        $connect_mg_params["ClientSecretCredential"] = New-Object System.Management.Automation.PSCredential($client_id, $($client_secret | ConvertTo-SecureString))
+# If the parameter set is client secret, then we need to create a client secret credential object
+If ($PSCmdlet.ParameterSetName -eq "ClientSecret") {
+    $connect_mg_params["ClientSecretCredential"] = New-Object System.Management.Automation.PSCredential($client_id, $($client_secret | ConvertTo-SecureString))
 
-    # If the parameter set is certificate, then we need to set the certificate thumbprint
-    } ElseIf ($PSCmdlet.ParameterSetName -eq "Certificate") {
-        $connect_mg_params["ClientId"] = $client_id
-        $connect_mg_params["CertificateThumbprint"] = $certificate_thumbpint
+# If the parameter set is certificate, then we need to set the certificate thumbprint
+} ElseIf ($PSCmdlet.ParameterSetName -eq "Certificate") {
+    $connect_mg_params["ClientId"] = $client_id
+    $connect_mg_params["CertificateThumbprint"] = $certificate_thumbpint
 
-    }
-# If the parameter set is delegated, then we need to set the scope
 } ElseIf ($PSCmdlet.ParameterSetName -eq "Delegated") {
-    $connect_mg_params["Scope"] = $scope
+    $connect_mg_params["Scopes"] = $scopes
 
 }
 #endregion
