@@ -70,7 +70,7 @@ param (
     [Parameter(Mandatory=$true, ParameterSetName="Certificate")]
     [string]$Tenant_Id,
     [Parameter(Mandatory=$true, ParameterSetName="Certificate")]
-    [string]$Certificate_Thumbpint,
+    [string]$Certificate_Thumbprint,
     [Parameter(Mandatory=$true, ParameterSetName="ClientSecret")]
     [string]$Client_Secret
 
@@ -116,7 +116,7 @@ If ($PSCmdlet.ParameterSetName -eq "ClientSecret") {
 # If the parameter set is certificate, then we need to set the certificate thumbprint
 } ElseIf ($PSCmdlet.ParameterSetName -eq "Certificate") {
     $connect_mg_params["ClientId"] = $client_id
-    $connect_mg_params["CertificateThumbprint"] = $certificate_thumbpint
+    $connect_mg_params["CertificateThumbprint"] = $certificate_thumbprint
 
 } ElseIf ($PSCmdlet.ParameterSetName -eq "Delegated") {
     $connect_mg_params["Scopes"] = $scopes
@@ -527,23 +527,33 @@ Function New-CAPIndexHtml {
         
         # Add the detailed policy reports to the index.html file
         foreach ($report in $policyReports) {
-            # Get the JSON file path
-            $json_path = $report.Path -replace '\.html$', '.json'
+            # Get the previous version's JSON file path
+            $current_version = [int]($report.Path -replace '.*_Version_(\d+)\.html', '$1')
+            $previous_version = $current_version - 1
+            $previous_json_path = $report.Path -replace "_Version_$current_version\.html$", "_Version_$previous_version.json"
 
-            # Get the JSON content
-            $json_content = Get-Content -Path $json_path -Raw
-            
-            # Get the JSON bytes
-            $json_bytes = [System.Text.Encoding]::UTF8.GetBytes($json_content)
+            # Check if the previous version's JSON file exists
+            if (Test-Path $previous_json_path) {
+                # Get the JSON content
+                $json_content = Get-Content -Path $previous_json_path -Raw
+                
+                # Get the JSON bytes
+                $json_bytes = [System.Text.Encoding]::UTF8.GetBytes($json_content)
 
-            # Get the JSON base64
-            $json_base64 = [Convert]::ToBase64String($json_bytes)
+                # Get the JSON base64
+                $json_base64 = [Convert]::ToBase64String($json_bytes)
+                
+                # Add the download button for the previous version's JSON
+                $download_button = "<a href=`"data:application/json;base64,$json_base64`" download=`"$($report.Policy)_Previous_Version.json`" class=`"download-btn`">Download Previous Version's JSON</a>"
+            } else {
+                $download_button = "<span>No previous version available</span>"
+            }
             
             # Add the detailed policy report to the index.html file
             $index_html += "
             <div id=`"$($report.Policy)`" class=`"policy-report`">
                 <h3>$($report.Policy)</h3>
-                <a href=`"data:application/json;base64,$json_base64`" download=`"$($report.Policy).json`" class=`"download-btn`">Download JSON</a>
+                $download_button
                 $($report.Html)
             </div>"
         }
@@ -989,7 +999,7 @@ Function Send-GraphMailMessage {
 Try {
     Write-Output "Connecting to Graph"
     # Connecting to Microsoft Graph
-    Connect-MgGraph @connect_mg_params
+    #Connect-MgGraph @connect_mg_params
     Write-Output "Connected to Graph successfully"
 
 } Catch {
@@ -1084,17 +1094,24 @@ Foreach ($policy in $policies) {
 #region Post Processing
 
 # Create the index.html file
-If ($policy_reports.Count -gt 0) {
+If (@($policy_reports).Count -gt 0) {
     $index_html_obj = New-CAPIndexHtml -PolicyReports $policy_reports -OutputPath $output_path
     Write-Output "Index HTML created at: $($index_html_obj.Path)"
+ 
+    # If there are email addresses to send the email to, then we send the email
+    If ($to -and $from) {
+        # Finalize the Send-GraphMailMessage parameters
+        $send_mail_params["Body"] = $index_html_obj.Html
+        $send_mail_params["Attachments"] = $index_html_obj.Path
+        If ($PSCmdlet.ParameterSetName -eq "Delegated") {
+            Write-Warning "Sending messages as another user is not supported with delegated permissions. Please use a managed identity or app registration to send the email."
 
-    # Finalize the Send-GraphMailMessage parameters
-    $send_mail_params["Body"] = $index_html_obj.Html
-    $send_mail_params["Attachments"] = $index_html_obj.Path
-    
-    # Send an email with the index HTML
-    Send-GraphMailMessage @send_mail_params
+        } Else {
+            # Sending the email
+            Send-GraphMailMessage @send_mail_params
 
+        }
+    }
 } Else {
     Write-Output "No policy changes detected. No index HTML created."
 
