@@ -142,21 +142,25 @@ $send_mail_params["Attachments"] = $outfile
 
 # Connect-MgGraph parameters
 $connect_mg_params = @{}
-$connect_mg_params["TenantId"] = $tenant_id
-$connect_mg_params["NoWelcome"] = $true
+$connect_mg_params["NoWelcome"] = $false
     
 # If the parameter set is client secret, then we need to create a client secret credential object
 If ($PSCmdlet.ParameterSetName -eq "ClientSecret") {
-    $connect_mg_params["ClientSecretCredential"] = New-Object System.Management.Automation.PSCredential($client_id, $($client_secret | ConvertTo-SecureString))
-
+    $connect_mg_params["ClientSecretCredential"] = New-Object System.Management.Automation.PSCredential($clientId, $($clientSecret | ConvertTo-SecureString))
+    $connect_mg_params["TenantId"] = $tenantId
+    
 # If the parameter set is certificate, then we need to set the certificate thumbprint
 } ElseIf ($PSCmdlet.ParameterSetName -eq "Certificate") {
-    $connect_mg_params["ClientId"] = $client_id
-    $connect_mg_params["CertificateThumbprint"] = $certificate_thumbprint
+    $connect_mg_params["ClientId"] = $clientId
+    $connect_mg_params["CertificateThumbprint"] = $certificateThumbprint
+    $connect_mg_params["TenantId"] = $tenantId
 
 } ElseIf ($PSCmdlet.ParameterSetName -eq "Delegated") {
     $connect_mg_params["Scopes"] = $scopes
+    If ($tenantId) {
+        $connect_mg_params["TenantId"] = $tenantId
 
+    }
 }
 #endregion
 
