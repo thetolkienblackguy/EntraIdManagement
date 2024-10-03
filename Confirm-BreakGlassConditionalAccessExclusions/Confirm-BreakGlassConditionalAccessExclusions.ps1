@@ -142,7 +142,6 @@ $send_mail_params["Attachments"] = $outfile
 
 # Connect-MgGraph parameters
 $connect_mg_params = @{}
-$connect_mg_params["NoWelcome"] = $false
     
 # If the parameter set is client secret, then we need to create a client secret credential object
 If ($PSCmdlet.ParameterSetName -eq "ClientSecret") {
